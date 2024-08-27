@@ -87,22 +87,13 @@ class Personag
     protected List<Product> Products;
     public int Money { get; protected set; }
 
-    protected void AddMoney(int value)
-    {
-        Money += value;
-    }
-
-    protected void SubtractMoney(int value)
-    {
-        Money -= value;
-    }
-
-    public void ShowAll()
+    public virtual void ShowProducts()
     {
         foreach (var product in Products)
             product.ShowInfo();
 
         Console.WriteLine("Money: " + Money);
+        Console.WriteLine();
     }
 
     public Product GetProduct()
@@ -117,6 +108,16 @@ class Personag
                     return product;
             }
         }
+    }
+
+    protected void AddMoney(int value)
+    {
+        Money += value;
+    }
+
+    protected void SubtractMoney(int value)
+    {
+        Money -= value;
     }
 
     protected void AddProduct(Product product)
@@ -147,11 +148,10 @@ class Vendor : Personag
         DeleteProduct(product);
     }
 
-    public void ShowProducts()
+    public override void ShowProducts()
     {
         Console.WriteLine("At the seller: ");
-        ShowAll();
-        Console.WriteLine();
+        base.ShowProducts();
     }
 }
 
@@ -180,10 +180,9 @@ class Buyer : Personag
         return product;
     }
 
-    public void ShowProducts()
+    public override void ShowProducts()
     {
         Console.WriteLine("At the bayer: ");
-        ShowAll();
-        Console.WriteLine();
+        base.ShowProducts();
     }
 }
