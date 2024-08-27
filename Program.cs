@@ -43,7 +43,7 @@ class Program
                     break;
 
                 case CommandBuyProduct:
-                    changer.BuySell(vendor, buyer);
+                    changer.Trade(vendor, buyer);
                     break;
 
                 case CommandExit:
@@ -82,26 +82,13 @@ class Product
     }
 }
 
-class Personag
-{
-    protected List<Product> Products { get; set; }
-    public int Money { get; protected set; }
-
-    public virtual void ShowProducts()
-    {
-        foreach (var product in Products)
-            product.ShowInfo();
-
-        Console.WriteLine("Money: " + Money);
-        Console.WriteLine();
-    }
-}
-
 class Changer
 {
-    public void BuySell(Vendor vendor, Buyer buyer)
+    public void Trade(Vendor vendor, Buyer buyer)
     {
-        Product product = buyer.BuyProduct(vendor.GetProductForSell());
+        Product product = vendor.GetProductForSell();
+
+        buyer.BuyProduct(product);
 
         if (product == null) return;
 
@@ -109,11 +96,26 @@ class Changer
     }
 }
 
+class Personag
+{
+    protected List<Product> _products;
+    public int Money { get; protected set; }
+
+    public virtual void ShowProducts()
+    {
+        foreach (var product in _products)
+            product.ShowInfo();
+
+        Console.WriteLine("Money: " + Money);
+        Console.WriteLine();
+    }
+}
+
 class Vendor : Personag
 {
     public Vendor() : base()
     {
-        Products = new List<Product>() {new Product("milk", 26), new Product("shugar", 17),
+        _products = new List<Product>() {new Product("milk", 26), new Product("shugar", 17),
                                         new Product("pork", 48), new Product("salt", 19),
                                         new Product("peper", 11), new Product("meat", 52),
                                         new Product("ches", 44), new Product("oil", 19) }; ;
@@ -124,7 +126,7 @@ class Vendor : Personag
     {
         string neededProduct = Utils.ReadString("What do you want to buy: ");
 
-        foreach (var product in Products)
+        foreach (var product in _products)
         {
             if (product.Title == neededProduct)
                 return product;
@@ -135,8 +137,8 @@ class Vendor : Personag
 
     public void SellProduct(Product product)
     {
-        AddMoney(product.Price);
-        DeleteProduct(product);
+        Money += product.Price;
+        _products.Remove(product);
     }
 
     public override void ShowProducts()
@@ -144,30 +146,19 @@ class Vendor : Personag
         Console.WriteLine("At the seller: ");
         base.ShowProducts();
     }
-
-    private void AddMoney(int value)
-    {
-        Money += value;
-    }
-
-    private void DeleteProduct(Product product)
-    {
-        Products.Remove(product);
-    }
 }
 
 class Buyer : Personag
 {
     public Buyer() : base()
     {
-        Products = new List<Product>();
+        _products = new List<Product>();
         Money = 100;
     }
 
-    public Product BuyProduct(Product product)
+    public void BuyProduct(Product product)
     {
-        if (product == null)
-            return null;
+        if (product == null) return;
 
         if (product.Price <= Money)
         {
@@ -178,8 +169,6 @@ class Buyer : Personag
         {
             Console.WriteLine("Do not enought mony for this product");
         }
-
-        return product;
     }
 
     public override void ShowProducts()
@@ -195,6 +184,6 @@ class Buyer : Personag
 
     private void AddProduct(Product product)
     {
-        Products.Add(product);
+        _products.Add(product);
     }
 }
