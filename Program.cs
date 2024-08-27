@@ -42,7 +42,8 @@ class Program
                     break;
 
                 case CommandBuyProduct:
-                    var product = buyer.BuyProduct(vendor);
+                    Product product = buyer.BuyProduct(vendor);
+                    if (product == null) break;
                     vendor.SellProduct(product);
                     break;
 
@@ -59,7 +60,7 @@ static class Utils
     static public string ReadString(string text = "")
     {
         Console.Write(text + " ");
-        var tempString = Console.ReadLine().ToLower();
+        string tempString = Console.ReadLine().ToLower();
         Console.WriteLine();
         return tempString;
     }
@@ -67,14 +68,14 @@ static class Utils
 
 class Product
 {
-    public string Title { get; private set; }
-    public int Price { get; private set; }
-
     public Product(string title = "", int price = 0)
     {
         Title = title;
         Price = price;
     }
+
+    public string Title { get; private set; }
+    public int Price { get; private set; }
 
     public void ShowInfo()
     {
@@ -84,7 +85,7 @@ class Product
 
 class Personag
 {
-    protected List<Product> Products;
+    public List<Product> Products { get; protected set; }
     public int Money { get; protected set; }
 
     public virtual void ShowProducts()
@@ -94,40 +95,6 @@ class Personag
 
         Console.WriteLine("Money: " + Money);
         Console.WriteLine();
-    }
-
-    public Product GetProduct()
-    {
-        while (true)
-        {
-            string neededProduct = Utils.ReadString("What do you want to buy: ");
-
-            foreach (var product in Products)
-            {
-                if (product.Title == neededProduct)
-                    return product;
-            }
-        }
-    }
-
-    protected void AddMoney(int value)
-    {
-        Money += value;
-    }
-
-    protected void SubtractMoney(int value)
-    {
-        Money -= value;
-    }
-
-    protected void AddProduct(Product product)
-    {
-        Products.Add(product);
-    }
-
-    protected void DeleteProduct(Product product)
-    {
-        Products.Remove(product);
     }
 }
 
@@ -153,6 +120,16 @@ class Vendor : Personag
         Console.WriteLine("At the seller: ");
         base.ShowProducts();
     }
+
+    private void AddMoney(int value)
+    {
+        Money += value;
+    }
+
+    private void DeleteProduct(Product product)
+    {
+        Products.Remove(product);
+    }
 }
 
 class Buyer : Personag
@@ -165,7 +142,10 @@ class Buyer : Personag
 
     public Product BuyProduct(Vendor vendor)
     {
-        var product = vendor.GetProduct();
+        Product product = GetProduct(vendor);
+
+        if (product == null)
+            return null;
 
         if (product.Price <= Money)
         {
@@ -184,5 +164,28 @@ class Buyer : Personag
     {
         Console.WriteLine("At the bayer: ");
         base.ShowProducts();
+    }
+
+    private Product GetProduct(Vendor vendor)
+    {
+        string neededProduct = Utils.ReadString("What do you want to buy: ");
+
+        foreach (var product in vendor.Products)
+        {
+            if (product.Title == neededProduct)
+                return product;
+        }
+
+        return null;
+    }
+
+    private void SubtractMoney(int value)
+    {
+        Money -= value;
+    }
+
+    private void AddProduct(Product product)
+    {
+        Products.Add(product);
     }
 }
