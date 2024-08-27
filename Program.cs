@@ -53,9 +53,6 @@ class Changer
             return;
 
         buyer.BuyProduct(product);
-
-        if (product == null) return;
-
         vendor.SellProduct(product);
     }
 }
@@ -107,7 +104,7 @@ class Magazin
     }
 }
 
-class Personag
+class Person
 {
     protected List<Product> _products;
     public int Money { get; protected set; }
@@ -122,7 +119,7 @@ class Personag
     }
 }
 
-class Vendor : Personag
+class Vendor : Person
 {
     public Vendor() : base()
     {
@@ -163,7 +160,7 @@ class Vendor : Personag
     }
 }
 
-class Buyer : Personag
+class Buyer : Person
 {
     public Buyer() : base()
     {
@@ -173,7 +170,8 @@ class Buyer : Personag
 
     public void BuyProduct(Product product)
     {
-        if (product == null) return;
+        if (product == null)
+            return;
 
         if (product.Price <= Money)
         {
