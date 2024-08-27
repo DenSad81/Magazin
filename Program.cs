@@ -16,6 +16,7 @@ class Program
 
         Vendor vendor = new Vendor();
         Buyer buyer = new Buyer();
+        Changer changer = new Changer();
         bool isRun = true;
 
         Console.WriteLine($"Menu: {CommandShowVendorProducts}-Show vendor products;");
@@ -42,9 +43,7 @@ class Program
                     break;
 
                 case CommandBuyProduct:
-                    Product product = buyer.BuyProduct(vendor);
-                    if (product == null) break;
-                    vendor.SellProduct(product);
+                    changer.BuySell(vendor, buyer);
                     break;
 
                 case CommandExit:
@@ -85,7 +84,7 @@ class Product
 
 class Personag
 {
-    public List<Product> Products { get; protected set; }
+    protected List<Product> Products { get; set; }
     public int Money { get; protected set; }
 
     public virtual void ShowProducts()
@@ -98,6 +97,18 @@ class Personag
     }
 }
 
+class Changer
+{
+    public void BuySell(Vendor vendor, Buyer buyer)
+    {
+        Product product = buyer.BuyProduct(vendor.GetProductForSell());
+
+        if (product == null) return;
+
+        vendor.SellProduct(product);
+    }
+}
+
 class Vendor : Personag
 {
     public Vendor() : base()
@@ -107,6 +118,19 @@ class Vendor : Personag
                                         new Product("peper", 11), new Product("meat", 52),
                                         new Product("ches", 44), new Product("oil", 19) }; ;
         Money = 0;
+    }
+
+    public Product GetProductForSell()
+    {
+        string neededProduct = Utils.ReadString("What do you want to buy: ");
+
+        foreach (var product in Products)
+        {
+            if (product.Title == neededProduct)
+                return product;
+        }
+
+        return null;
     }
 
     public void SellProduct(Product product)
@@ -140,10 +164,8 @@ class Buyer : Personag
         Money = 100;
     }
 
-    public Product BuyProduct(Vendor vendor)
+    public Product BuyProduct(Product product)
     {
-        Product product = GetProduct(vendor);
-
         if (product == null)
             return null;
 
@@ -164,19 +186,6 @@ class Buyer : Personag
     {
         Console.WriteLine("At the bayer: ");
         base.ShowProducts();
-    }
-
-    private Product GetProduct(Vendor vendor)
-    {
-        string neededProduct = Utils.ReadString("What do you want to buy: ");
-
-        foreach (var product in vendor.Products)
-        {
-            if (product.Title == neededProduct)
-                return product;
-        }
-
-        return null;
     }
 
     private void SubtractMoney(int value)
