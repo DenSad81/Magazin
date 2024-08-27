@@ -8,15 +8,68 @@ class Program
 {
     static void Main(string[] args)
     {
+        Vendor vendor = new Vendor();
+        Buyer buyer = new Buyer();
+        Changer changer = new Changer();
+        Magazin magazin = new Magazin();
+
+        magazin.Procces(vendor, buyer, changer);
+    }
+}
+
+static class Utils
+{
+    static public string ReadString(string text = "")
+    {
+        Console.Write(text + " ");
+        string tempString = Console.ReadLine().ToLower();
+        Console.WriteLine();
+        return tempString;
+    }
+}
+
+class Product
+{
+    public Product(string title = "", int price = 0)
+    {
+        Title = title;
+        Price = price;
+    }
+
+    public string Title { get; private set; }
+    public int Price { get; private set; }
+
+    public void ShowInfo()
+    {
+        Console.WriteLine(Title + " " + Price + "$");
+    }
+}
+
+class Changer
+{
+    public void Trade(Vendor vendor, Buyer buyer)
+    {
+        if (vendor.TryGetProductForSell(out Product product) == false)
+            return;
+
+        buyer.BuyProduct(product);
+
+        if (product == null) return;
+
+        vendor.SellProduct(product);
+    }
+}
+
+class Magazin
+{
+    public void Procces(Vendor vendor, Buyer buyer, Changer changer)
+    {
         const string CommandShowVendorProducts = "1";
         const string CommandShowBuyerProducts = "2";
         const string CommandShowAllProducts = "3";
         const string CommandBuyProduct = "4";
         const string CommandExit = "9";
 
-        Vendor vendor = new Vendor();
-        Buyer buyer = new Buyer();
-        Changer changer = new Changer();
         bool isRun = true;
 
         Console.WriteLine($"Menu: {CommandShowVendorProducts}-Show vendor products;");
@@ -54,48 +107,6 @@ class Program
     }
 }
 
-static class Utils
-{
-    static public string ReadString(string text = "")
-    {
-        Console.Write(text + " ");
-        string tempString = Console.ReadLine().ToLower();
-        Console.WriteLine();
-        return tempString;
-    }
-}
-
-class Product
-{
-    public Product(string title = "", int price = 0)
-    {
-        Title = title;
-        Price = price;
-    }
-
-    public string Title { get; private set; }
-    public int Price { get; private set; }
-
-    public void ShowInfo()
-    {
-        Console.WriteLine(Title + " " + Price + "$");
-    }
-}
-
-class Changer
-{
-    public void Trade(Vendor vendor, Buyer buyer)
-    {
-        Product product = vendor.GetProductForSell();
-
-        buyer.BuyProduct(product);
-
-        if (product == null) return;
-
-        vendor.SellProduct(product);
-    }
-}
-
 class Personag
 {
     protected List<Product> _products;
@@ -122,17 +133,21 @@ class Vendor : Personag
         Money = 0;
     }
 
-    public Product GetProductForSell()
+    public bool TryGetProductForSell(out Product product)
     {
         string neededProduct = Utils.ReadString("What do you want to buy: ");
 
-        foreach (var product in _products)
+        foreach (var prod in _products)
         {
-            if (product.Title == neededProduct)
-                return product;
+            if (prod.Title == neededProduct)
+            {
+                product = prod;
+                return true;
+            }
         }
 
-        return null;
+        product = null;
+        return false;
     }
 
     public void SellProduct(Product product)
